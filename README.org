@@ -1,0 +1,21 @@
+#+title: consult-hatena-bookmark
+
+consult-hatena-bookmarkは、Emacs上で[[https://github.com/minad/consult][consult]]を利用して自分の[[https://b.hatena.ne.jp][はてなブックマーク]]を検索する機能を提供します。
+
+外部コマンドとして =w3m= を用いますので、
+=w3m= で[[https://b.hatena.ne.jp][はてなブックマーク]]にログインしておいてください。
+
+内部では[[http://developer.hatena.ne.jp/ja/documents/bookmark/apis/fulltext_search][マイブックマーク全文検索API]]を使っています。
+
+** leaf.el 設定例
+[[https://github.com/conao3/leaf.el][leaf.el]] による設定例です。
+
+#+begin_src emacs-lisp
+  (leaf consult-hatena-bookmark
+    ;; :ensure t ;; ←まだmelpa登録してないのでこれはできない
+    :bind
+    ("C-c h" . consult-hatena-bookmark))
+#+end_src
+
+** 参考資料
+- https://github.com/minad/consult
