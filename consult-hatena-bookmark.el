@@ -65,7 +65,7 @@ FIND-FILE is the file open function, defaulting to `find-file'."
   (pcase-let ((`(,arg . ,opts) (consult--command-split input)))
     (unless (string-blank-p arg)
       (list :command (split-string-and-unquote (format "w3m -dump https://b.hatena.ne.jp/my/search/json?q=%s" (url-hexify-string input)))
-            :highlight (cdr (consult--default-regexp-compiler input 'basic))))))
+            :highlight (cdr (consult--default-regexp-compiler input 'basic t))))))
 
 (defun consult--hatena-bookmark-format (lines)
   "Format bookmark candidates from LINES."
