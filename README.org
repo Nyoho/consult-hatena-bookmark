@@ -2,7 +2,7 @@
 
 consult-hatena-bookmarkは、Emacs上で[[https://github.com/minad/consult][consult]]を利用して自分の[[https://b.hatena.ne.jp][はてなブックマーク]]を検索する機能を提供します。
 
-外部コマンドとして =w3m= を用いますので、
+外部コマンドとして [[http://w3m.sourceforge.net][w3m]] を用いますので、
 =w3m= で[[https://b.hatena.ne.jp][はてなブックマーク]]にログインしておいてください。
 
 内部では[[http://developer.hatena.ne.jp/ja/documents/bookmark/apis/fulltext_search][マイブックマーク全文検索API]]を使っています。
