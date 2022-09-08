@@ -87,8 +87,8 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                                            (title (gethash "title" entry)))
                                       (add-face-text-property 0 (length url) 'consult-file nil url)
                                       (propertize
-                                       (format "%-50.50s %-40.40s 💬%s %s"
-                                               title url comment date)
+                                       (format "%-50.50s %-40.40s %-23.23s 💬%s"
+                                               title url date comment)
                                        'consult--candidate url)))
                                   bookmarks)))))))
     (nreverse candidates)))
