@@ -30,7 +30,20 @@
 
 ;;; Code:
 
+(require 'subr-x)
 (require 'consult)
+
+(defcustom consult-hatena-bookmark-hatena-username nil
+  "Your username of Hatena")
+
+(defcustom consult-hatena-bookmark-hatena-api-key nil
+  "Your API key of Hatena.
+
+Your API key is the string of the part of your submission mail address before `@'.
+See 
+https://www.hatena.ne.jp/my/config/mail/upload
+https://developer.hatena.ne.jp/ja/documents/auth/apis/wsse
+")
 
 (defvar consult--hatena-bookmark-history nil)
 
@@ -93,6 +106,97 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                                   bookmarks)))))))
     (nreverse candidates)))
 
+(defun consult--hatena-bookmark-string-to-list (str)
+  "Parse string STR as JSON and construct candidates."
+  (let (candidates)
+    (save-match-data
+      (if-let (json (json-parse-string str))
+          (let* ((meta (gethash "meta" json))
+                 (bookmarks (gethash "bookmarks" json)))
+            (unless (eq (gethash "total" meta) 0)
+              (setq candidates
+                    (append candidates
+                            (mapcar (lambda (item)
+                                      (let* ((ts (gethash "timestamp" item))
+                                             (date (format-time-string "%Y-%m-%d %a %H:%M:%S" (seconds-to-time ts)))
+                                             (comment (gethash "comment" item))
+                                             (entry (gethash "entry" item))
+                                             (url (gethash "url" entry))
+                                             (title (gethash "title" entry)))
+                                        (add-face-text-property 0 (length url) 'consult-file nil url)
+                                        (propertize
+                                         (format "%-50.50s %-40.40s %-23.23s 💬%s"
+                                                 title url date comment)
+                                         'consult--candidate url)))
+                                    bookmarks)))))))
+    (nreverse candidates)))
+
+(defun consult--hatena-bookmark-get (callback input)
+  "Access the Hatena Bookmark API with INPUT and pass the result to CALLBACK."
+  (let* ((username consult-hatena-bookmark-hatena-username)
+         (api-key consult-hatena-bookmark-hatena-api-key)
+         (nonce
+             (secure-hash 'sha1 (secure-hash 'sha1 (number-to-string (random 100000000000000)) nil nil t) nil nil t))
+         (created (format-time-string "%Y-%m-%dT%H:%M:%SZ"))
+         (digest
+          (base64-encode-string
+           (secure-hash 'sha1 (concat nonce created api-key) nil nil t)))
+         (wsse-header
+          (format
+           "UsernameToken Username=\"%s\", PasswordDigest=\"%s\", Nonce=\"%s\", Created=\"%s\""
+           username
+           digest
+           (base64-encode-string nonce)
+           created))
+         (url-request-method "GET")
+         (url-request-extra-headers
+          `(("Authorization" . "WSSE profile=\"UsernameToken\"")
+            ("X-WSSE" . ,wsse-header)))
+         (url
+          (format
+           "https://b.hatena.ne.jp/my/search/json?q=%s"
+           (url-hexify-string input))))
+    (url-retrieve url
+                  (lambda (status)
+                    (goto-char url-http-end-of-headers)
+                    (funcall callback
+                             (thread-first
+                               (buffer-substring (point) (point-max))
+                               (consult--hatena-bookmark-string-to-list)))))))
+
+(defun consult--hatena-bookmark-search (callback &optional input)
+  "Perform a search query for INPUT, receiving its results with CALLBACK."
+  (consult--hatena-bookmark-get callback input))
+
+(defun consult--hatena-bookmark-search-all (callback &optional input)
+  "Perform a search query for INPUT, receiving its results with CALLBACK."
+  (consult--hatena-bookmark-search (lambda (&rest items)
+                                     (funcall callback (apply #'append items)))
+                                   input))
+
+(defun consult-hatena-bookmark--async-search (next input)
+  "Async search with NEXT, INPUT."
+  (let ((current ""))
+    (lambda (action)
+      (pcase action
+        (""
+         )
+        ((pred stringp)
+         (hatena-bookmark-search-all
+          (lambda (x)
+            (funcall next 'flush)
+            (funcall next x))
+          action))
+        (_ (funcall next action))))))
+
+(defun consult-hatena-bookmark--search-generator (input)
+  "Generate an async search closure for INPUT."
+  (thread-first (consult--async-sink)
+    (consult--async-refresh-immediate)
+    (consult-hatena-bookmark--async-search input)
+    (consult--async-throttle)
+    (consult--async-split)))
+
 ;;;###autoload
 (defun consult-hatena-bookmark (&optional initial)
   "Search for your Hatena Bookmark with INITIAL input.
@@ -101,9 +205,7 @@ The process fetching your Hatena bookmarks is started asynchronously."
   (unless (executable-find "w3m")
     (warn "The command w3m not found."))
   (browse-url (consult--read
-               (consult--async-command #'consult--hatena-bookmark-builder
-                 (consult--async-transform consult--hatena-bookmark-format)
-                 (consult--async-highlight #'consult--hatena-bookmark-builder))
+               (consult-hatena-bookmark--search-generator initial)
                :prompt "Hatena Bookmark: "
                :category 'url
                :require-match t
