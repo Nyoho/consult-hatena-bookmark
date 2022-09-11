@@ -210,7 +210,7 @@ The process fetching your Hatena bookmarks is started asynchronously."
                :category 'url
                :require-match t
                :lookup #'consult--lookup-candidate
-               :initial initial
+               :initial (consult--async-split-initial initial)
                :add-history (consult--async-split-thingatpt 'symbol)
                :history '(:input consult--hatena-bookmark-history))))
 
