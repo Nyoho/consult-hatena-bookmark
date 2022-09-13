@@ -4,7 +4,7 @@
 
 ;; Author: Yukinori Kitadai
 ;; Package-Requires: ((emacs "27.1") (consult "0.9"))
-;; Version: 0.0.0
+;; Version: 0.1.0
 ;; URL: https://github.com/Nyoho/consult-hatena-bookmark
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -24,8 +24,9 @@
 
 ;;; Commentary:
 
-;; Preparation: Sign in Hatena Bookmark https://b.hatena.ne.jp in `w3m`.
-;;
+;; Preparation: Set `consult-hatena-bookmark-hatena-username' 
+;; and `consult-hatena-bookmark-hatena-api-key'.
+
 ;; Run the function `consult-hatena-bookmark`
 
 ;;; Code:
