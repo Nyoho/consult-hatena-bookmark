@@ -24,7 +24,7 @@
 
 ;;; Commentary:
 
-;; Preparation: Set `consult-hatena-bookmark-hatena-username' 
+;; Preparation: Set `consult-hatena-bookmark-hatena-username'
 ;; and `consult-hatena-bookmark-hatena-api-key'.
 
 ;; Run the function `consult-hatena-bookmark`
@@ -34,17 +34,25 @@
 (require 'subr-x)
 (require 'consult)
 
+(defgroup consult-hatena-bookmark nil
+  "Consulting Hatena Bookmark."
+  :group 'convenience)
+
 (defcustom consult-hatena-bookmark-hatena-username nil
-  "Your username of Hatena")
+  "Your username of Hatena."
+  :group 'consult-hatena-bookmark
+  :type 'string)
 
 (defcustom consult-hatena-bookmark-hatena-api-key nil
   "Your API key of Hatena.
 
-Your API key is the string of the part of your submission mail address before `@'.
-See 
+Your API key is the string of the part of your submission mail address
+ before `@'.
+See:
 https://www.hatena.ne.jp/my/config/mail/upload
-https://developer.hatena.ne.jp/ja/documents/auth/apis/wsse
-")
+https://developer.hatena.ne.jp/ja/documents/auth/apis/wsse ."
+  :group 'consult-hatena-bookmark
+  :type 'string)
 
 (defvar consult--hatena-bookmark-history nil)
 
@@ -175,7 +183,7 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                                      (funcall callback (apply #'append items)))
                                    input))
 
-(defun consult-hatena-bookmark--async-search (next input)
+(defun consult--hatena-bookmark--async-search (next input)
   "Async search with NEXT, INPUT."
   (let ((current ""))
     (lambda (action)
@@ -183,7 +191,7 @@ FIND-FILE is the file open function, defaulting to `find-file'."
         (""
          )
         ((pred stringp)
-         (hatena-bookmark-search-all
+         (consult--hatena-bookmark-search-all
           (lambda (x)
             (funcall next 'flush)
             (funcall next x))
@@ -194,7 +202,7 @@ FIND-FILE is the file open function, defaulting to `find-file'."
   "Generate an async search closure for INPUT."
   (thread-first (consult--async-sink)
     (consult--async-refresh-immediate)
-    (consult-hatena-bookmark--async-search input)
+    (consult--hatena-bookmark--async-search input)
     (consult--async-throttle)
     (consult--async-split)))
 
