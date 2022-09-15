@@ -211,8 +211,10 @@ FIND-FILE is the file open function, defaulting to `find-file'."
   "Search for your Hatena Bookmark with INITIAL input.
 The process fetching your Hatena bookmarks is started asynchronously."
   (interactive)
-  (unless (executable-find "w3m")
-    (warn "The command w3m not found."))
+  (unless consult-hatena-bookmark-hatena-username
+    (warn "Set consult-hatena-bookmark-hatena-username."))
+  (unless consult-hatena-bookmark-hatena-api-key
+    (warn "Set consult-hatena-bookmark-hatena-api-key."))
   (browse-url (consult--read
                (consult-hatena-bookmark--search-generator initial)
                :prompt "Hatena Bookmark: "
