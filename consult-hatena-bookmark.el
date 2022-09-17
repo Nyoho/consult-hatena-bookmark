@@ -226,3 +226,5 @@ The process fetching your Hatena bookmarks is started asynchronously."
                :history '(:input consult--hatena-bookmark-history))))
 
 (provide 'consult-hatena-bookmark)
+
+;;; consult-hatena-bookmark.el ends here
