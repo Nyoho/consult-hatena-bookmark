@@ -133,10 +133,17 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                                              (url (gethash "url" entry))
                                              (title (gethash "title" entry)))
                                         (add-face-text-property 0 (length url) 'consult-file nil url)
-                                        (propertize
-                                         (format "%-50.50s %-40.40s %-23.23s 💬%s"
-                                                 title url date comment)
-                                         'consult--candidate url)))
+                                        (propertize 
+                                         (propertize
+                                          (concat
+                                           (format "%s %s" title url)
+                                           (if (string= comment "") "" (format " 💬.o(%s)" comment)))
+                                          'hatena-bookmark-item
+                                          `((date    . ,date)
+                                            (comment . ,comment)
+                                            ))
+                                         'consult--candidate
+                                         url)))
                                     bookmarks)))))))
     (nreverse candidates)))
 
@@ -218,12 +225,29 @@ The process fetching your Hatena bookmarks is started asynchronously."
   (browse-url (consult--read
                (consult-hatena-bookmark--search-generator initial)
                :prompt "Hatena Bookmark: "
-               :category 'url
+               :category 'hatena-bookmark-item
                :require-match t
                :lookup #'consult--lookup-candidate
                :initial (consult--async-split-initial initial)
                :add-history (consult--async-split-thingatpt 'symbol)
                :history '(:input consult--hatena-bookmark-history))))
+
+
+(with-eval-after-load "marginalia"
+  (defun consult-hatena-bookmark--annotate (cand)
+    "Compute marginalia fields for candidate CAND."
+    (when-let (x (get-text-property 0 'hatena-bookmark-item cand))
+      (marginalia--fields
+       ((if-let (d (alist-get 'comment x))
+            (format "%s" d) "")
+        :face 'marginalia-char :width 12)
+       ((if-let (d (alist-get 'date x))
+            (format "%s" d)
+          "")
+        :face 'marginalia-date :width -10))))
+
+  (add-to-list 'marginalia-annotator-registry
+               '(hatena-bookmark-item consult-hatena-bookmark--annotate)))
 
 (provide 'consult-hatena-bookmark)
 
