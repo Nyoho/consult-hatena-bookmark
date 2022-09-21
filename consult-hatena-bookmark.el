@@ -130,6 +130,7 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                                              (date (format-time-string "%Y-%m-%d %a %H:%M:%S" (seconds-to-time ts)))
                                              (comment (gethash "comment" item))
                                              (entry (gethash "entry" item))
+                                             (count (gethash "count" entry))
                                              (url (gethash "url" entry))
                                              (title (gethash "title" entry)))
                                         (add-face-text-property 0 (length url) 'consult-file nil url)
@@ -141,6 +142,7 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                                           'hatena-bookmark-item
                                           `((date    . ,date)
                                             (comment . ,comment)
+                                            (count . ,count)
                                             ))
                                          'consult--candidate
                                          url)))
@@ -238,9 +240,9 @@ The process fetching your Hatena bookmarks is started asynchronously."
     "Compute marginalia fields for candidate CAND."
     (when-let (x (get-text-property 0 'hatena-bookmark-item cand))
       (marginalia--fields
-       ((if-let (d (alist-get 'comment x))
-            (format "%s" d) "")
-        :face 'marginalia-char :width 12)
+       ((if-let (d (alist-get 'count x))
+            (format "%5d" d) "")
+        :face 'marginalia-number :width 5)
        ((if-let (d (alist-get 'date x))
             (format "%s" d)
           "")
