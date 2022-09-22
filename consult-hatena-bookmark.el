@@ -138,7 +138,7 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                                          (propertize
                                           (concat
                                            (format "%s %s" title url)
-                                           (if (string= comment "") "" (format " 💬.o(%s)" comment)))
+                                           (if (string= comment "") "" (format " %s" comment)))
                                           'hatena-bookmark-item
                                           `((date    . ,date)
                                             (comment . ,comment)
