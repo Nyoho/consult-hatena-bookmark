@@ -134,6 +134,7 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                                              (url (gethash "url" entry))
                                              (title (gethash "title" entry)))
                                         (add-face-text-property 0 (length url) 'consult-file nil url)
+                                        (add-face-text-property 0 (length comment) 'marginalia-char nil comment)
                                         (propertize 
                                          (propertize
                                           (concat
