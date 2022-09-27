@@ -3,7 +3,7 @@
 ;; Copyright (C) 2021 Yukinori Kitadai
 
 ;; Author: Yukinori Kitadai
-;; Package-Requires: ((emacs "27.1") (consult "0.9") (async-await "20220827.437")
+;; Package-Requires: ((emacs "27.1") (consult "0.9") (async-await "1.1"))
 ;; Version: 0.1.0
 ;; URL: https://github.com/Nyoho/consult-hatena-bookmark
 
@@ -55,9 +55,9 @@ https://developer.hatena.ne.jp/ja/documents/auth/apis/wsse ."
   :group 'consult-hatena-bookmark
   :type 'string)
 
-(defvar consult--hatena-bookmark-history nil)
+(defvar consult-hatena-bookmark--history nil)
 
-(defun consult--hatena-bookmark-position (cand &optional find-file)
+(defun consult-hatena-bookmark--position (cand &optional find-file)
   "Return the hatena-bookmark position marker for CAND.
 FIND-FILE is the file open function, defaulting to `find-file'."
   (when cand
@@ -71,7 +71,7 @@ FIND-FILE is the file open function, defaulting to `find-file'."
        (funcall (or find-file #'find-file) file)
        line col))))
 
-(defun consult--hatena-bookmark-state ()
+(defun consult-hatena-bookmark--state ()
   "Hatena-Bookmark preview state function."
   (let ((open (consult--temporary-files))
         (jump (consult--jump-state)))
@@ -79,18 +79,18 @@ FIND-FILE is the file open function, defaulting to `find-file'."
       (when restore
         (funcall open))
       (funcall jump
-               (consult--hatena-bookmark-position cand (and (not restore) open))
+               (consult-hatena-bookmark--position cand (and (not restore) open))
                restore))))
 
 
-(defun consult--hatena-bookmark-builder (input)
+(defun consult-hatena-bookmark--builder (input)
   "Build command line given INPUT."
   (pcase-let ((`(,arg . ,opts) (consult--command-split input)))
     (unless (string-blank-p arg)
       (list :command (split-string-and-unquote (format "w3m -dump https://b.hatena.ne.jp/my/search/json?q=%s" (url-hexify-string input)))
             :highlight (cdr (consult--default-regexp-compiler input 'basic t))))))
 
-(defun consult--hatena-bookmark-format (lines)
+(defun consult-hatena-bookmark--format (lines)
   "Format bookmark candidates from LINES."
   (let ((candidates nil))
     (save-match-data
@@ -116,7 +116,7 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                                   bookmarks)))))))
     (nreverse candidates)))
 
-(defun consult--hatena-bookmark-string-to-list (str)
+(defun consult-hatena-bookmark--string-to-list (str)
   "Parse string STR as JSON and construct candidates."
   (let (candidates)
     (save-match-data
@@ -137,7 +137,7 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                                              (title (gethash "title" entry)))
                                         (add-face-text-property 0 (length url) 'consult-file nil url)
                                         (add-face-text-property 0 (length comment) 'marginalia-char nil comment)
-                                        (propertize 
+                                        (propertize
                                          (propertize
                                           (concat
                                            (format "%s %s" title url)
@@ -145,15 +145,15 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                                           'hatena-bookmark-item
                                           `((date    . ,date)
                                             (comment . ,comment)
-                                            (count . ,count)
-                                            ))
+                                            (count . ,count)))
                                          'consult--candidate
                                          url)))
                                     bookmarks))))
             `(,total ,(nreverse candidates)))))))
 
-(defun consult--hatena-bookmark-get (input &optional offset)
-  "Access the Hatena Bookmark API with INPUT and pass the result to CALLBACK."
+(defun consult-hatena-bookmark--get (input &optional offset)
+  "Access the Hatena Bookmark API with INPUT.
+Use optional argument OFFSET to set `of' (=offset) option to search API."
   (let* ((username consult-hatena-bookmark-hatena-username)
          (api-key consult-hatena-bookmark-hatena-api-key)
          (nonce
@@ -191,38 +191,35 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                                (if (not (url-http-parse-headers))
                                    (funcall reject (buffer-string))
                                  (goto-char url-http-end-of-headers)
-                                 (funcall resolve (consult--hatena-bookmark-string-to-list (buffer-substring (point) (point-max))))))
+                                 (funcall resolve (consult-hatena-bookmark--string-to-list (buffer-substring (point) (point-max))))))
                            (error (funcall reject ex))))))))))
 
-(defun consult--hatena-bookmark-search (callback &optional input offset)
+(defun consult-hatena-bookmark--search (callback &optional input offset)
   "Perform a search query for INPUT, receiving its results with CALLBACK."
-  (consult--hatena-bookmark-get callback input offset))
+  (consult-hatena-bookmark--get callback input offset))
 
-(async-defun consult--hatena-bookmark-search-all (callback &optional input)
+(async-defun consult-hatena-bookmark--search-all (callback &optional input)
   "Perform a search query for INPUT, receiving its results with CALLBACK."
   (let (total (count 0) (offset 0))
     (while (or (not total) (< count total))
-      (let* ((res (await (consult--hatena-bookmark-get input offset)))
+      (let* ((res (await (consult-hatena-bookmark--get input offset)))
              (total_ (car res))
              (items (cdr res)))
         (if (not total) (setq total total_))
         (setq items (apply #'append items))
         (setq count (+ count (length items)))
         (setq offset (+ 1 offset))
-        (funcall callback items)
-        )
-       )))
+        (funcall callback items)))))
 
-(defun consult--hatena-bookmark--async-search (next input)
+(defun consult-hatena-bookmark---async-search (next input)
   "Async search with NEXT, INPUT."
   (let ((current ""))
     (lambda (action)
       (pcase action
-        (""
-         )
+        ("")
         ((pred stringp)
          (funcall next 'flush)
-         (consult--hatena-bookmark-search-all
+         (consult-hatena-bookmark--search-all
           (lambda (x)
             (funcall next x))
           action))
@@ -232,7 +229,7 @@ FIND-FILE is the file open function, defaulting to `find-file'."
   "Generate an async search closure for INPUT."
   (thread-first (consult--async-sink)
     (consult--async-refresh-immediate)
-    (consult--hatena-bookmark--async-search input)
+    (consult-hatena-bookmark---async-search input)
     (consult--async-throttle)
     (consult--async-split)))
 
@@ -253,7 +250,7 @@ The process fetching your Hatena bookmarks is started asynchronously."
                :lookup #'consult--lookup-candidate
                :initial (consult--async-split-initial initial)
                :add-history (consult--async-split-thingatpt 'symbol)
-               :history '(:input consult--hatena-bookmark-history))))
+               :history '(:input consult-hatena-bookmark--history))))
 
 
 (with-eval-after-load "marginalia"
