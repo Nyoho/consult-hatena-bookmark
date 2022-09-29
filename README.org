@@ -1,5 +1,48 @@
 #+title: consult-hatena-bookmark
 
+A package to search your bookmarks of the [[https://b.hatena.ne.jp][Hatena Bookmark]] with [[https://github.com/minad/consult][consult]].
+
+[[https://b.hatena.ne.jp][Hatena Bookmark]] is the biggest social bookmarking site in Japan.
+
+** Usage
+Call the function =consult-hatena-bookmark=.
+
+And then, type something after '#' to search with API.
+
+#+begin_src
+#someword
+#+end_src
+(~someword~ is searched with the API.)
+
+Moreover if you input the second '#' after your input, you can filter the result from API locally.
+
+#+begin_src
+#someword#foo
+#+end_src
+(filtered with ~foo~ locally due to consult. It's a very useful feature. The author likes it.)
+
+
+** Preparation
+
+Set the following for WSSE authentication.
+
+- =consult-hatena-bookmark-hatena-username= (your Hatena ID)
+- =consult-hatena-bookmark-hatena-api-key= (your Hatena API key)
+
+** leaf.el example
+#+begin_src emacs-lisp
+  (setq consult-hatena-bookmark-hatena-username "your Hatena ID")
+  (setq consult-hatena-bookmark-hatena-api-key "your Hatena API key")
+#+end_src
+
+#+begin_src emacs-lisp
+  (leaf consult-hatena-bookmark
+    :bind
+    ("C-c h" . consult-hatena-bookmark))
+#+end_src
+
+
+* 日本語説明
 consult-hatena-bookmarkは、Emacs上で[[https://github.com/minad/consult][consult]]を利用して自分の[[https://b.hatena.ne.jp][はてなブックマーク]]を検索する機能を提供します。
 
 (breaking change w3m を使わないようにしました 0.1.0 ) +外部コマンドとして [[http://w3m.sourceforge.net][w3m]] を用いますので =w3m= で[[https://b.hatena.ne.jp][はてなブックマーク]]にログインしておいてください。+
@@ -10,6 +53,13 @@ consult-hatena-bookmarkは、Emacs上で[[https://github.com/minad/consult][cons
 
 ** leaf.el 設定例
 [[https://github.com/conao3/leaf.el][leaf.el]] による設定例です。
+
+秘密裏にAPIキー =consult-hatena-bookmark-hatena-api-key= を設定して下さい。 =consult-hatena-bookmark-hatena-username= は秘密にしなくていいです。
+
+#+begin_src emacs-lisp
+  (setq consult-hatena-bookmark-hatena-username "your Hatena ID")
+  (setq consult-hatena-bookmark-hatena-api-key "your Hatena API key")
+#+end_src
 
 #+begin_src emacs-lisp
   (leaf consult-hatena-bookmark
