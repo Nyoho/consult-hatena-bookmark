@@ -211,7 +211,7 @@ Use optional argument OFFSET to set `of' (=offset) option to search API."
         (setq offset (+ 1 offset))
         (funcall callback items)))))
 
-(defun consult-hatena-bookmark---async-search (next input)
+(defun consult-hatena-bookmark---async-search (next)
   "Async search with NEXT, INPUT."
   (let ((current ""))
     (lambda (action)
@@ -225,11 +225,11 @@ Use optional argument OFFSET to set `of' (=offset) option to search API."
           action))
         (_ (funcall next action))))))
 
-(defun consult-hatena-bookmark--search-generator (input)
-  "Generate an async search closure for INPUT."
+(defun consult-hatena-bookmark--search-generator ()
+  "Generate an async search closure."
   (thread-first (consult--async-sink)
     (consult--async-refresh-immediate)
-    (consult-hatena-bookmark---async-search input)
+    (consult-hatena-bookmark---async-search)
     (consult--async-throttle)
     (consult--async-split)))
 
@@ -243,7 +243,7 @@ The process fetching your Hatena bookmarks is started asynchronously."
   (unless consult-hatena-bookmark-hatena-api-key
     (warn "Set consult-hatena-bookmark-hatena-api-key."))
   (browse-url (consult--read
-               (consult-hatena-bookmark--search-generator initial)
+               (consult-hatena-bookmark--search-generator)
                :prompt "Hatena Bookmark: "
                :category 'hatena-bookmark-item
                :require-match t
