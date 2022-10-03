@@ -211,19 +211,19 @@ Use optional argument OFFSET to set `of' (=offset) option to search API."
         (setq offset (+ 1 offset))
         (funcall callback items)))))
 
-(defun consult-hatena-bookmark---async-search (next)
-  "Async search with NEXT, INPUT."
+(defun consult-hatena-bookmark---async-search (async)
+  "Async search with ASYNC, INPUT."
   (let ((current ""))
     (lambda (action)
       (pcase action
         ("")
         ((pred stringp)
-         (funcall next 'flush)
+         (funcall async 'flush)
          (consult-hatena-bookmark--search-all
           (lambda (x)
-            (funcall next x))
+            (funcall async x))
           action))
-        (_ (funcall next action))))))
+        (_ (funcall async action))))))
 
 (defun consult-hatena-bookmark--search-generator ()
   "Generate an async search closure."
