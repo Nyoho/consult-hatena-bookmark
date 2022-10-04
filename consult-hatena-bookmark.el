@@ -82,40 +82,6 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                (consult-hatena-bookmark--position cand (and (not restore) open))
                restore))))
 
-
-(defun consult-hatena-bookmark--builder (input)
-  "Build command line given INPUT."
-  (pcase-let ((`(,arg . ,opts) (consult--command-split input)))
-    (unless (string-blank-p arg)
-      (list :command (split-string-and-unquote (format "w3m -dump https://b.hatena.ne.jp/my/search/json?q=%s" (url-hexify-string input)))
-            :highlight (cdr (consult--default-regexp-compiler input 'basic t))))))
-
-(defun consult-hatena-bookmark--format (lines)
-  "Format bookmark candidates from LINES."
-  (let ((candidates nil))
-    (save-match-data
-      (dolist (str lines)
-        (let* ((json (json-parse-string str))
-               (meta (gethash "meta" json))
-               (bookmarks (gethash "bookmarks" json)))
-          (unless (eq (gethash "total" meta) 0)
-            (setq candidates
-                  (append candidates
-                          (mapcar (lambda (item)
-                                    (let* ((ts (gethash "timestamp" item))
-                                           (date (format-time-string "%Y-%m-%d %a %H:%M:%S" (seconds-to-time ts)))
-                                           (comment (gethash "comment" item))
-                                           (entry (gethash "entry" item))
-                                           (url (gethash "url" entry))
-                                           (title (gethash "title" entry)))
-                                      (add-face-text-property 0 (length url) 'consult-file nil url)
-                                      (propertize
-                                       (format "%-50.50s %-40.40s %-23.23s 💬%s"
-                                               title url date comment)
-                                       'consult--candidate url)))
-                                  bookmarks)))))))
-    (nreverse candidates)))
-
 (defun consult-hatena-bookmark--string-to-list (str)
   "Parse string STR as JSON and construct candidates."
   (let (candidates)
