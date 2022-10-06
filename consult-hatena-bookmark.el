@@ -117,9 +117,8 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                                     bookmarks))))
             `(,total ,(nreverse candidates)))))))
 
-(defun consult-hatena-bookmark--get (input &optional offset)
-  "Access the Hatena Bookmark API with INPUT.
-Use optional argument OFFSET to set `of' (=offset) option to search API."
+(defun consult-hatena-bookmark--make-wsse-header ()
+  "A helper function to make WSSE header as a string."
   (let* ((username consult-hatena-bookmark-hatena-username)
          (api-key consult-hatena-bookmark-hatena-api-key)
          (nonce
@@ -127,18 +126,21 @@ Use optional argument OFFSET to set `of' (=offset) option to search API."
          (created (format-time-string "%Y-%m-%dT%H:%M:%SZ"))
          (digest
           (base64-encode-string
-           (secure-hash 'sha1 (concat nonce created api-key) nil nil t)))
-         (wsse-header
-          (format
-           "UsernameToken Username=\"%s\", PasswordDigest=\"%s\", Nonce=\"%s\", Created=\"%s\""
-           username
-           digest
-           (base64-encode-string nonce)
-           created))
-         (url-request-method "GET")
+           (secure-hash 'sha1 (concat nonce created api-key) nil nil t))))
+    (format
+     "UsernameToken Username=\"%s\", PasswordDigest=\"%s\", Nonce=\"%s\", Created=\"%s\""
+     username
+     digest
+     (base64-encode-string nonce)
+     created)))
+
+(defun consult-hatena-bookmark--get (input &optional offset)
+  "Access the Hatena Bookmark API with INPUT.
+Use optional argument OFFSET to set `of' (=offset) option to search API."
+  (let* ((url-request-method "GET")
          (url-request-extra-headers
           `(("Authorization" . "WSSE profile=\"UsernameToken\"")
-            ("X-WSSE" . ,wsse-header)))
+            ("X-WSSE" . ,(consult-hatena-bookmark--make-wsse-header))))
          (url
           (format
            "https://b.hatena.ne.jp/my/search/json?q=%s&limit=20"
