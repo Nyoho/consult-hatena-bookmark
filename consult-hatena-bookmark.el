@@ -144,7 +144,7 @@ Use optional argument OFFSET to set `of' (=offset) option to search API."
          (url
           (format
            "https://b.hatena.ne.jp/my/search/json?q=%s&limit=20"
-           (url-hexify-string input) (if offset (format "of=%d" offset) ""))))
+           (url-hexify-string input))))
     (if offset
         (setq url (concat url (format "&of=%d" offset))))
 
