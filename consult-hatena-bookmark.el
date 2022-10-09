@@ -168,15 +168,14 @@ Use optional argument OFFSET to set `of' (=offset) option to search API."
 
 (async-defun consult-hatena-bookmark--search-all (callback &optional input)
   "Perform a search query for INPUT, receiving its results with CALLBACK."
-  (let (total (count 0) (offset 0))
-    (while (or (not total) (< count total))
+  (let (total (offset 0))
+    (while (or (not total) (< offset total))
       (let* ((res (await (consult-hatena-bookmark--get input offset)))
              (total_ (car res))
              (items (cdr res)))
         (if (not total) (setq total total_))
         (setq items (apply #'append items))
-        (setq count (+ count (length items)))
-        (setq offset (+ 1 offset))
+        (setq offset (+ offset (length items)))
         (funcall callback items)))))
 
 (defun consult-hatena-bookmark---async-search (async)
