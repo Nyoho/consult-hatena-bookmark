@@ -179,7 +179,7 @@ Use optional argument OFFSET to set `of' (=offset) option to search API."
         (funcall callback items)))))
 
 (defun consult-hatena-bookmark---async-search (async)
-  "Async search with ASYNC, INPUT."
+  "Async search with ASYNC."
   (let ((current ""))
     (lambda (action)
       (pcase action
