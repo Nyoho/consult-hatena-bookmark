@@ -134,17 +134,18 @@ FIND-FILE is the file open function, defaulting to `find-file'."
      (base64-encode-string nonce)
      created)))
 
-(defun consult-hatena-bookmark--get (input &optional offset)
+(defun consult-hatena-bookmark--get (input &optional offset limit)
   "Access the Hatena Bookmark API with INPUT.
 Use optional argument OFFSET to set `of' (=offset) option to search API."
   (let* ((url-request-method "GET")
          (url-request-extra-headers
           `(("Authorization" . "WSSE profile=\"UsernameToken\"")
             ("X-WSSE" . ,(consult-hatena-bookmark--make-wsse-header))))
+         (limit-string (if limit (format "&limit=%d" limit) ""))
          (url
           (format
-           "https://b.hatena.ne.jp/my/search/json?q=%s&limit=20"
-           (url-hexify-string input))))
+           "https://b.hatena.ne.jp/my/search/json?q=%s%s"
+           (url-hexify-string input) limit-string)))
     (if offset
         (setq url (concat url (format "&of=%d" offset))))
 
@@ -168,11 +169,13 @@ Use optional argument OFFSET to set `of' (=offset) option to search API."
 
 (async-defun consult-hatena-bookmark--search-all (callback &optional input)
   "Perform a search query for INPUT, receiving its results with CALLBACK."
-  (let (total (offset 0))
+  (let (total (offset 0) (first-time t))
     (while (or (not total) (< offset total))
-      (let* ((res (await (consult-hatena-bookmark--get input offset)))
+      (let* ((limit (if first-time 20 100))
+             (res (await (consult-hatena-bookmark--get input offset limit)))
              (total_ (car res))
              (items (cdr res)))
+        (setq first-time nil)
         (if (not total) (setq total total_))
         (setq items (apply #'append items))
         (setq offset (+ offset (length items)))
