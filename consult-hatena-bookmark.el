@@ -57,6 +57,8 @@ https://developer.hatena.ne.jp/ja/documents/auth/apis/wsse ."
 
 (defvar consult-hatena-bookmark--history nil)
 
+(defvar consult-hatena-bookmark--stopping nil)
+
 (defun consult-hatena-bookmark--position (cand &optional find-file)
   "Return the hatena-bookmark position marker for CAND.
 FIND-FILE is the file open function, defaulting to `find-file'."
@@ -170,7 +172,7 @@ Use optional argument OFFSET to set `of' (=offset) option to search API."
 (async-defun consult-hatena-bookmark--search-all (callback &optional input)
   "Perform a search query for INPUT, receiving its results with CALLBACK."
   (let (total (offset 0) (first-time t))
-    (while (or (not total) (< offset total))
+    (while (and (or (not total) (< offset total)) (null consult-hatena-bookmark--stopping))
       (let* ((limit (if first-time 20 100))
              (res (await (consult-hatena-bookmark--get input offset limit)))
              (total_ (car res))
@@ -186,13 +188,18 @@ Use optional argument OFFSET to set `of' (=offset) option to search API."
   (let ((current ""))
     (lambda (action)
       (pcase action
-        ("")
+        (""
+         (setq consult-hatena-bookmark--stopping t))
         ((pred stringp)
          (funcall async 'flush)
+         (setq consult-hatena-bookmark--stopping nil)
          (consult-hatena-bookmark--search-all
           (lambda (x)
             (funcall async x))
           action))
+        ('destroy
+         (setq consult-hatena-bookmark--stopping t)
+         (funcall async 'destroy))
         (_ (funcall async action))))))
 
 (defun consult-hatena-bookmark--search-generator ()
