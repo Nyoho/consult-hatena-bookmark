@@ -138,7 +138,8 @@ FIND-FILE is the file open function, defaulting to `find-file'."
 
 (defun consult-hatena-bookmark--get (input &optional offset limit)
   "Access the Hatena Bookmark API with INPUT.
-Use optional argument OFFSET to set `of' (=offset) option to search API."
+Use optional argument OFFSET to set `of' (=offset) option to search API.
+Use optional argument LIMIT to limit the result of API (default: 20, max: 100)."
   (let* ((url-request-method "GET")
          (url-request-extra-headers
           `(("Authorization" . "WSSE profile=\"UsernameToken\"")
