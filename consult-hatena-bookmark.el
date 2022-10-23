@@ -94,30 +94,29 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                  (total (gethash "total" meta)))
             (unless (eq total 0)
               (setq candidates
-                    (append candidates
-                            (mapcar (lambda (item)
-                                      (let* ((ts (gethash "timestamp" item))
-                                             (date (format-time-string "%Y-%m-%d %a %H:%M:%S" (seconds-to-time ts)))
-                                             (comment (gethash "comment" item))
-                                             (entry (gethash "entry" item))
-                                             (count (gethash "count" entry))
-                                             (url (gethash "url" entry))
-                                             (title (gethash "title" entry)))
-                                        (add-face-text-property 0 (length url) 'consult-file nil url)
-                                        (add-face-text-property 0 (length comment) 'marginalia-char nil comment)
-                                        (propertize
-                                         (propertize
-                                          (concat
-                                           (format "%s %s" title url)
-                                           (if (string= comment "") "" (format " %s" comment)))
-                                          'hatena-bookmark-item
-                                          `((date    . ,date)
-                                            (comment . ,comment)
-                                            (count . ,count)))
-                                         'consult--candidate
-                                         url)))
-                                    bookmarks))))
-            `(,total ,(nreverse candidates)))))))
+                    (mapcar (lambda (item)
+                              (let* ((ts (gethash "timestamp" item))
+                                     (date (format-time-string "%Y-%m-%d %a %H:%M:%S" (seconds-to-time ts)))
+                                     (comment (gethash "comment" item))
+                                     (entry (gethash "entry" item))
+                                     (count (gethash "count" entry))
+                                     (url (gethash "url" entry))
+                                     (title (gethash "title" entry)))
+                                (add-face-text-property 0 (length url) 'consult-file nil url)
+                                (add-face-text-property 0 (length comment) 'marginalia-char nil comment)
+                                (propertize
+                                 (propertize
+                                  (concat
+                                   (format "%s %s" title url)
+                                   (if (string= comment "") "" (format " %s" comment)))
+                                  'hatena-bookmark-item
+                                  `((date    . ,date)
+                                    (comment . ,comment)
+                                    (count . ,count)))
+                                 'consult--candidate
+                                 url)))
+                            bookmarks)))
+            `(,total ,candidates))))))
 
 (defun consult-hatena-bookmark--make-wsse-header ()
   "A helper function to make WSSE header as a string."
@@ -227,6 +226,7 @@ The process fetching your Hatena bookmarks is started asynchronously."
                :require-match t
                :lookup #'consult--lookup-candidate
                :initial (consult--async-split-initial initial)
+               :sort nil
                :add-history (consult--async-split-thingatpt 'symbol)
                :history '(:input consult-hatena-bookmark--history))))
 
