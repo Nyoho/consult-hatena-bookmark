@@ -165,10 +165,6 @@ Use optional argument LIMIT to limit the result of API (default: 20, max: 100)."
                                  (funcall resolve (consult-hatena-bookmark--string-to-list (buffer-substring (point) (point-max))))))
                            (error (funcall reject ex))))))))))
 
-(defun consult-hatena-bookmark--search (callback &optional input offset)
-  "Perform a search query for INPUT, receiving its results with CALLBACK."
-  (consult-hatena-bookmark--get callback input offset))
-
 (async-defun consult-hatena-bookmark--search-all (callback &optional input)
   "Perform a search query for INPUT, receiving its results with CALLBACK."
   (let (total (offset 0) (first-time t))
