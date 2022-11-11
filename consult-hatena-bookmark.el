@@ -181,22 +181,21 @@ Use optional argument LIMIT to limit the result of API (default: 20, max: 100)."
 
 (defun consult-hatena-bookmark---async-search (async)
   "Async search with ASYNC."
-  (let ((current ""))
-    (lambda (action)
-      (pcase action
-        (""
-         (setq consult-hatena-bookmark--stopping t))
-        ((pred stringp)
-         (funcall async 'flush)
-         (setq consult-hatena-bookmark--stopping nil)
-         (consult-hatena-bookmark--search-all
-          (lambda (x)
-            (funcall async x))
-          action))
-        ('destroy
-         (setq consult-hatena-bookmark--stopping t)
-         (funcall async 'destroy))
-        (_ (funcall async action))))))
+  (lambda (action)
+    (pcase action
+      (""
+       (setq consult-hatena-bookmark--stopping t))
+      ((pred stringp)
+       (funcall async 'flush)
+       (setq consult-hatena-bookmark--stopping nil)
+       (consult-hatena-bookmark--search-all
+        (lambda (x)
+          (funcall async x))
+        action))
+      ('destroy
+       (setq consult-hatena-bookmark--stopping t)
+       (funcall async 'destroy))
+      (_ (funcall async action)))))
 
 (defun consult-hatena-bookmark--search-generator ()
   "Generate an async search closure."
