@@ -88,7 +88,7 @@ FIND-FILE is the file open function, defaulting to `find-file'."
   "Parse string STR as JSON and construct candidates."
   (let (candidates)
     (save-match-data
-      (if-let (json (json-parse-string str))
+      (if-let ((json (json-parse-string str)))
           (let* ((meta (gethash "meta" json))
                  (bookmarks (gethash "bookmarks" json))
                  (total (gethash "total" meta)))
@@ -229,12 +229,12 @@ The process fetching your Hatena bookmarks is started asynchronously."
 (with-eval-after-load "marginalia"
   (defun consult-hatena-bookmark--annotate (cand)
     "Compute marginalia fields for candidate CAND."
-    (when-let (x (get-text-property 0 'hatena-bookmark-item cand))
+    (when-let ((x (get-text-property 0 'hatena-bookmark-item cand)))
       (marginalia--fields
-       ((if-let (d (alist-get 'count x))
+       ((if-let ((d (alist-get 'count x)))
             (format "%5d" d) "")
         :face 'marginalia-number :width 5)
-       ((if-let (d (alist-get 'date x))
+       ((if-let ((d (alist-get 'date x)))
             (format "%s" d)
           "")
         :face 'marginalia-date :width -10))))
