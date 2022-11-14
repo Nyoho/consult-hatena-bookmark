@@ -85,7 +85,8 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                restore))))
 
 (defun consult-hatena-bookmark--annotator ()
-  "Annotate `consult-hatena-bookmark' candidates with counts of bookmarks and dates."
+  "Annotate `consult-hatena-bookmark' candidates.
+Currently with counts of bookmarks and dates."
   (let* ((align (propertize " " 'display `(space :align-to (- right 29)))))
     (lambda (cand)
       (let ((x (get-text-property 0 'hatena-bookmark-item cand)))
