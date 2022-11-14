@@ -84,6 +84,17 @@ FIND-FILE is the file open function, defaulting to `find-file'."
                (consult-hatena-bookmark--position cand (and (not restore) open))
                restore))))
 
+(defun consult-hatena-bookmark--annotator ()
+  "Annotate `consult-hatena-bookmark' candidates with counts of bookmarks and dates."
+  (let* ((align (propertize " " 'display `(space :align-to (- right 29)))))
+    (lambda (cand)
+      (let ((x (get-text-property 0 'hatena-bookmark-item cand)))
+        (concat align
+         (if-let (d (alist-get 'count x))
+             (format "%5d " d) " ")
+         (if-let (d (alist-get 'date x))
+             (format "%s" d) ""))))))
+
 (defun consult-hatena-bookmark--string-to-list (str)
   "Parse string STR as JSON and construct candidates."
   (let (candidates)
@@ -221,26 +232,10 @@ The process fetching your Hatena bookmarks is started asynchronously."
                :require-match t
                :lookup #'consult--lookup-candidate
                :initial (consult--async-split-initial initial)
+               :annotate (consult-hatena-bookmark--annotator)
                :sort nil
                :add-history (consult--async-split-thingatpt 'symbol)
                :history '(:input consult-hatena-bookmark--history))))
-
-
-(with-eval-after-load "marginalia"
-  (defun consult-hatena-bookmark--annotate (cand)
-    "Compute marginalia fields for candidate CAND."
-    (when-let (x (get-text-property 0 'hatena-bookmark-item cand))
-      (marginalia--fields
-       ((if-let (d (alist-get 'count x))
-            (format "%5d" d) "")
-        :face 'marginalia-number :width 5)
-       ((if-let (d (alist-get 'date x))
-            (format "%s" d)
-          "")
-        :face 'marginalia-date :width -10))))
-
-  (add-to-list 'marginalia-annotator-registry
-               '(hatena-bookmark-item consult-hatena-bookmark--annotate)))
 
 (provide 'consult-hatena-bookmark)
 
