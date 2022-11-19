@@ -108,7 +108,7 @@ Currently with counts of bookmarks and dates."
               (setq candidates
                     (mapcar (lambda (item)
                               (let* ((ts (gethash "timestamp" item))
-                                     (date (format-time-string "%Y-%m-%d %a %H:%M:%S" (seconds-to-time ts)))
+                                     (date (format-time-string "%F %T" (seconds-to-time ts)))
                                      (comment (gethash "comment" item))
                                      (entry (gethash "entry" item))
                                      (count (gethash "count" entry))
@@ -136,7 +136,7 @@ Currently with counts of bookmarks and dates."
          (api-key consult-hatena-bookmark-hatena-api-key)
          (nonce
              (secure-hash 'sha1 (secure-hash 'sha1 (number-to-string (random 100000000000000)) nil nil t) nil nil t))
-         (created (format-time-string "%Y-%m-%dT%H:%M:%SZ"))
+         (created (format-time-string "%FT%TZ"))
          (digest
           (base64-encode-string
            (secure-hash 'sha1 (concat nonce created api-key) nil nil t))))
