@@ -165,17 +165,11 @@ Use optional argument LIMIT to limit the result of API (default: 20, max: 100)."
 
     (promise-new
      (lambda (resolve reject)
-       (url-retrieve url
-                     (lambda (status)
-                       (if (plist-get status :error)
-                           (funcall reject (plist-get status :error))
-                         (condition-case ex
-                             (with-current-buffer (current-buffer)
-                               (if (not (url-http-parse-headers))
-                                   (funcall reject (buffer-string))
-                                 (goto-char url-http-end-of-headers)
-                                 (funcall resolve (consult-hatena-bookmark--string-to-list (buffer-substring (point) (point-max))))))
-                           (error (funcall reject ex))))))))))
+       (with-temp-buffer
+         (url-insert-file-contents url)
+         (if-let ((ret (consult-hatena-bookmark--string-to-list (buffer-substring (point) (point-max)))))
+             (funcall resolve ret)
+           (error (funcall reject nil))))))))
 
 (async-defun consult-hatena-bookmark--search-all (callback &optional input)
   "Perform a search query for INPUT, receiving its results with CALLBACK."
