@@ -20,14 +20,13 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-;;; Command: `consult-hatena-bookmark`
-
 ;;; Commentary:
 
 ;; Preparation: Set `consult-hatena-bookmark-hatena-username'
 ;; and `consult-hatena-bookmark-hatena-api-key'.
 
 ;; Run the function `consult-hatena-bookmark`
+;; or `M-x consult-hatena-bookmark`.
 
 ;;; Code:
 
