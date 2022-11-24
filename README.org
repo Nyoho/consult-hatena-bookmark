@@ -1,5 +1,8 @@
 #+title: consult-hatena-bookmark
 
+#+html: <a href="https://melpa.org/#/consult-hatena-bookmark"><img alt="MELPA" src="https://melpa.org/packages/consult-hatena-bookmark-badge.svg"/></a>
+#+html: <a href="https://stable.melpa.org/#/consult-hatena-bookmark"><img alt="MELPA Stable" src="https://stable.melpa.org/packages/consult-hatena-bookmark-badge.svg"/></a>
+
 A package to search your bookmarks of the [[https://b.hatena.ne.jp][Hatena Bookmark]] with [[https://github.com/minad/consult][consult]].
 
 [[https://b.hatena.ne.jp][Hatena Bookmark]] is the biggest social bookmarking site in Japan.
