@@ -127,7 +127,7 @@ Currently with counts of bookmarks and dates."
                                  'consult--candidate
                                  url)))
                             bookmarks)))
-            `(,total ,candidates))))))
+            (cons total candidates))))))
 
 (defun consult-hatena-bookmark--make-wsse-header ()
   "A helper function to make WSSE header as a string."
@@ -162,27 +162,28 @@ Use optional argument LIMIT to limit the result of API (default: 20, max: 100)."
     (if offset
         (setq url (concat url (format "&of=%d" offset))))
 
-    (promise-new
-     (lambda (resolve reject)
-       (with-temp-buffer
-         (url-insert-file-contents url)
-         (if-let ((ret (consult-hatena-bookmark--string-to-list (buffer-substring (point) (point-max)))))
-             (funcall resolve ret)
-           (error (funcall reject nil))))))))
+    (with-temp-buffer
+      (url-insert-file-contents url)
+      (consult-hatena-bookmark--string-to-list (buffer-substring (point) (point-max))))))
 
-(async-defun consult-hatena-bookmark--search-all (callback &optional input)
+(defun consult-hatena-bookmark--search-all (input)
   "Perform a search query for INPUT, receiving its results with CALLBACK."
-  (let (total (offset 0) (first-time t))
+  (let (total (offset 0) (first-time t) (all-items '()))
+    (message "search-all starts")
     (while (and (or (not total) (< offset total)) (null consult-hatena-bookmark--stopping))
       (let* ((limit (if first-time 20 100))
-             (res (await (consult-hatena-bookmark--get input offset limit)))
+             (res (consult-hatena-bookmark--get input offset limit))
              (total_ (car res))
              (items (cdr res)))
+        (message "length items is %d" (length items));;JSONのデコードがおかしい??
+        (message "Got %d items, total: %s, offset: %d" (length items) total_ offset)
         (setq first-time nil)
         (if (not total) (setq total total_))
-        (setq items (apply #'append items))
+        (setq all-items (append all-items items))
         (setq offset (+ offset (length items)))
-        (funcall callback items)))))
+        ))
+    (message "Search completed. Total items: %d" (length all-items))
+    all-items))
 
 (defun consult-hatena-bookmark---async-search (async)
   "Async search with ASYNC."
@@ -205,10 +206,11 @@ Use optional argument LIMIT to limit the result of API (default: 20, max: 100)."
 (defun consult-hatena-bookmark--search-generator ()
   "Generate an async search closure."
   (thread-first (consult--async-sink)
-    (consult--async-refresh-immediate)
+    (consult--async-refresh)
     (consult-hatena-bookmark---async-search)
     (consult--async-throttle)
-    (consult--async-split)))
+    (consult--async-split)
+    ))
 
 ;;;###autoload
 (defun consult-hatena-bookmark (&optional initial)
@@ -220,15 +222,20 @@ The process fetching your Hatena bookmarks is started asynchronously."
   (unless consult-hatena-bookmark-hatena-api-key
     (warn "Set consult-hatena-bookmark-hatena-api-key."))
   (browse-url (consult--read
-               (consult-hatena-bookmark--search-generator)
+               (consult--dynamic-collection
+                   (lambda (input)
+                     (message "%s" input)
+                     (consult-hatena-bookmark--search-all input)
+                     ))
                :prompt "Hatena Bookmark: "
                :category 'hatena-bookmark-item
                :require-match t
                :lookup #'consult--lookup-candidate
-               :initial (consult--async-split-initial initial)
+               :initial initial
+               ;; :state (consult-hatena-bookmark--state)
                :annotate (consult-hatena-bookmark--annotator)
                :sort nil
-               :add-history (consult--async-split-thingatpt 'symbol)
+               :add-history (thing-at-point 'symbol)
                :history '(:input consult-hatena-bookmark--history))))
 
 (provide 'consult-hatena-bookmark)
