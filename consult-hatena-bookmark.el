@@ -1,9 +1,9 @@
 ;;; consult-hatena-bookmark.el --- Consult commands for the Hatena Bookmark -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021, 2022 Yukinori Kitadai
+;; Copyright (C) 2021, 2022, 2025 Yukinori Kitadai
 
 ;; Author: Yukinori Kitadai
-;; Package-Requires: ((emacs "27.1") (consult "0.9") (async-await "1.1"))
+;; Package-Requires: ((emacs "27.1") (consult "1.0") (async-await "1.1"))
 ;; Version: 0.3.1
 ;; URL: https://github.com/Nyoho/consult-hatena-bookmark
 
@@ -180,8 +180,7 @@ Use optional argument LIMIT to limit the result of API (default: 20, max: 100)."
         (setq first-time nil)
         (if (not total) (setq total total_))
         (setq all-items (append all-items items))
-        (setq offset (+ offset (length items)))
-        ))
+        (setq offset (+ offset (length items)))))
     (message "Search completed. Total items: %d" (length all-items))
     all-items))
 
@@ -209,8 +208,7 @@ Use optional argument LIMIT to limit the result of API (default: 20, max: 100)."
     (consult--async-refresh)
     (consult-hatena-bookmark---async-search)
     (consult--async-throttle)
-    (consult--async-split)
-    ))
+    (consult--async-split)))
 
 ;;;###autoload
 (defun consult-hatena-bookmark (&optional initial)
@@ -225,8 +223,7 @@ The process fetching your Hatena bookmarks is started asynchronously."
                (consult--dynamic-collection
                    (lambda (input)
                      (message "%s" input)
-                     (consult-hatena-bookmark--search-all input)
-                     ))
+                     (consult-hatena-bookmark--search-all input)))
                :prompt "Hatena Bookmark: "
                :category 'hatena-bookmark-item
                :require-match t
