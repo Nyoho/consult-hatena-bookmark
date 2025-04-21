@@ -32,6 +32,8 @@ Set the following for WSSE authentication.
 - =consult-hatena-bookmark-hatena-username= (your Hatena ID)
 - =consult-hatena-bookmark-hatena-api-key= (your Hatena API key)
 
+Your Hatena API key is written in [[https://blog.hatena.ne.jp/-/config][the setting page of the Hatena blog]].
+
 ** leaf.el example
 #+begin_src emacs-lisp
   (setq consult-hatena-bookmark-hatena-username "your Hatena ID")
@@ -51,6 +53,7 @@ consult-hatena-bookmarkは、Emacs上で[[https://github.com/minad/consult][cons
 (breaking change w3m を使わないようにしました 0.1.0 ) +外部コマンドとして [[http://w3m.sourceforge.net][w3m]] を用いますので =w3m= で[[https://b.hatena.ne.jp][はてなブックマーク]]にログインしておいてください。+
 
 認証にWSSEを使うので、アカウント名を =consult-hatena-bookmark-hatena-username= に、APIキーを =consult-hatena-bookmark-hatena-api-key= に設定してください。
+はてなAPIキーは[[https://blog.hatena.ne.jp/-/config][はてなブログの「アカウント設定」→「基本設定」→「APIキー」]]に書いてあります。
 
 内部では[[http://developer.hatena.ne.jp/ja/documents/bookmark/apis/fulltext_search][マイブックマーク全文検索API]]を使っています。
 
