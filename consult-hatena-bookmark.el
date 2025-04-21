@@ -3,7 +3,7 @@
 ;; Copyright (C) 2021, 2022, 2025 Yukinori Kitadai
 
 ;; Author: Yukinori Kitadai
-;; Package-Requires: ((emacs "27.1") (consult "1.0") (async-await "1.1"))
+;; Package-Requires: ((emacs "27.1") (consult "2.0"))
 ;; Version: 0.3.1
 ;; URL: https://github.com/Nyoho/consult-hatena-bookmark
 
@@ -32,7 +32,6 @@
 
 (require 'subr-x)
 (require 'consult)
-(require 'async-await)
 
 (defgroup consult-hatena-bookmark nil
   "Consulting Hatena Bookmark."
