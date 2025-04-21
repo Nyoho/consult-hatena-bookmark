@@ -183,32 +183,6 @@ Use optional argument LIMIT to limit the result of API (default: 20, max: 100)."
     (message "Search completed. Total items: %d" (length all-items))
     all-items))
 
-(defun consult-hatena-bookmark---async-search (async)
-  "Async search with ASYNC."
-  (lambda (action)
-    (pcase action
-      (""
-       (setq consult-hatena-bookmark--stopping t))
-      ((pred stringp)
-       (funcall async 'flush)
-       (setq consult-hatena-bookmark--stopping nil)
-       (consult-hatena-bookmark--search-all
-        (lambda (x)
-          (funcall async x))
-        action))
-      ('destroy
-       (setq consult-hatena-bookmark--stopping t)
-       (funcall async 'destroy))
-      (_ (funcall async action)))))
-
-(defun consult-hatena-bookmark--search-generator ()
-  "Generate an async search closure."
-  (thread-first (consult--async-sink)
-    (consult--async-refresh)
-    (consult-hatena-bookmark---async-search)
-    (consult--async-throttle)
-    (consult--async-split)))
-
 ;;;###autoload
 (defun consult-hatena-bookmark (&optional initial)
   "Search for your Hatena Bookmark with INITIAL input.
@@ -220,9 +194,17 @@ The process fetching your Hatena bookmarks is started asynchronously."
     (warn "Set consult-hatena-bookmark-hatena-api-key."))
   (browse-url (consult--read
                (consult--dynamic-collection
-                   (lambda (input)
-                     (message "%s" input)
-                     (consult-hatena-bookmark--search-all input)))
+                   (lambda (input callback)
+                     (let (total (offset 0) (first-time t))
+                       (while (and (or (not total) (< offset total)))
+                         (let* ((limit (if first-time 20 100))
+                                (res (consult-hatena-bookmark--get input offset limit))
+                                (total_ (car res))
+                                (items (cdr res)))
+                           (setq first-time nil)
+                           (if (not total) (setq total total_))
+                           (setq offset (+ offset (length items)))
+                           (funcall callback items))))))
                :prompt "Hatena Bookmark: "
                :category 'hatena-bookmark-item
                :require-match t
