@@ -57,31 +57,6 @@ https://developer.hatena.ne.jp/ja/documents/auth/apis/wsse ."
 
 (defvar consult-hatena-bookmark--stopping nil)
 
-(defun consult-hatena-bookmark--position (cand &optional find-file)
-  "Return the hatena-bookmark position marker for CAND.
-FIND-FILE is the file open function, defaulting to `find-file'."
-  (when cand
-    (let* ((file-end (next-single-property-change 0 'face cand))
-           (line-end (next-single-property-change (+ 1 file-end) 'face cand))
-           (col (next-single-property-change (+ 1 line-end) 'face cand))
-           (file (substring-no-properties cand 0 file-end))
-           (line (string-to-number (substring-no-properties cand (+ 1 file-end) line-end))))
-      (setq col (if col (- col line-end 1) 0))
-      (consult--position-marker
-       (funcall (or find-file #'find-file) file)
-       line col))))
-
-(defun consult-hatena-bookmark--state ()
-  "Hatena-Bookmark preview state function."
-  (let ((open (consult--temporary-files))
-        (jump (consult--jump-state)))
-    (lambda (cand restore)
-      (when restore
-        (funcall open))
-      (funcall jump
-               (consult-hatena-bookmark--position cand (and (not restore) open))
-               restore))))
-
 (defun consult-hatena-bookmark--annotator ()
   "Annotate `consult-hatena-bookmark' candidates.
 Currently with counts of bookmarks and dates."
@@ -210,7 +185,6 @@ The process fetching your Hatena bookmarks is started asynchronously."
                :require-match t
                :lookup #'consult--lookup-candidate
                :initial initial
-               ;; :state (consult-hatena-bookmark--state)
                :annotate (consult-hatena-bookmark--annotator)
                :sort nil
                :add-history (thing-at-point 'symbol)
