@@ -69,7 +69,7 @@ consult-hatena-bookmarkは、Emacs上で[[https://github.com/minad/consult][cons
 
 #+begin_src emacs-lisp
   (leaf consult-hatena-bookmark
-    ;; :ensure t ;; ←まだmelpa登録してないのでこれはできない
+    :ensure t ;; ←melpa登録したのでできます🎉
     :bind
     ("C-c h" . consult-hatena-bookmark))
 #+end_src
