@@ -140,24 +140,6 @@ Use optional argument LIMIT to limit the result of API (default: 20, max: 100)."
       (url-insert-file-contents url)
       (consult-hatena-bookmark--string-to-list (buffer-substring (point) (point-max))))))
 
-(defun consult-hatena-bookmark--search-all (input)
-  "Perform a search query for INPUT, receiving its results with CALLBACK."
-  (let (total (offset 0) (first-time t) (all-items '()))
-    (message "search-all starts")
-    (while (and (or (not total) (< offset total)) (null consult-hatena-bookmark--stopping))
-      (let* ((limit (if first-time 20 100))
-             (res (consult-hatena-bookmark--get input offset limit))
-             (total_ (car res))
-             (items (cdr res)))
-        (message "length items is %d" (length items));;JSONのデコードがおかしい??
-        (message "Got %d items, total: %s, offset: %d" (length items) total_ offset)
-        (setq first-time nil)
-        (if (not total) (setq total total_))
-        (setq all-items (append all-items items))
-        (setq offset (+ offset (length items)))))
-    (message "Search completed. Total items: %d" (length all-items))
-    all-items))
-
 ;;;###autoload
 (defun consult-hatena-bookmark (&optional initial)
   "Search for your Hatena Bookmark with INITIAL input.
