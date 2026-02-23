@@ -1,10 +1,10 @@
 ;;; consult-hatena-bookmark.el --- Consult commands for the Hatena Bookmark -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021, 2022, 2025 Yukinori Kitadai
+;; Copyright (C) 2021, 2022, 2025, 2026 Yukinori Kitadai
 
 ;; Author: Yukinori Kitadai
 ;; Package-Requires: ((emacs "27.1") (consult "2.0"))
-;; Version: 0.4.1
+;; Version: 0.5.0
 ;; URL: https://github.com/Nyoho/consult-hatena-bookmark
 
 ;; This program is free software: you can redistribute it and/or modify
