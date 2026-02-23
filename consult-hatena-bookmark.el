@@ -86,20 +86,26 @@ Currently with counts of bookmarks and dates."
                                      (entry (gethash "entry" item))
                                      (count (gethash "count" entry))
                                      (url (gethash "url" entry))
-                                     (title (gethash "title" entry)))
-                                (add-face-text-property 0 (length url) 'consult-file nil url)
-                                (add-face-text-property 0 (length comment) 'marginalia-char nil comment)
+                                     (title (gethash "title" entry))
+                                     ;; A space character that visually displays as newline+indent.
+                                     ;; Using display property only on separators (not on
+                                     ;; title/url/comment) allows highlights to remain visible.
+                                     (nl (propertize " " 'display "\n  "))
+                                     (cand-str
+                                      (concat
+                                       (propertize title 'face 'consult-file)
+                                       nl
+                                       url
+                                       (if (string= comment "") ""
+                                         (concat nl
+                                                 (propertize comment 'face 'marginalia-char))))))
                                 (propertize
-                                 (propertize
-                                  (concat
-                                   (format "%s %s" title url)
-                                   (if (string= comment "") "" (format " %s" comment)))
-                                  'hatena-bookmark-item
-                                  `((date    . ,date)
-                                    (comment . ,comment)
-                                    (count . ,count)))
-                                 'consult--candidate
-                                 url)))
+                                 cand-str
+                                 'hatena-bookmark-item
+                                 `((date    . ,date)
+                                   (comment . ,comment)
+                                   (count   . ,count))
+                                 'consult--candidate url)))
                             bookmarks)))
             (cons total candidates))))))
 
